@@ -9,6 +9,447 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" id="navbar" style="display: none;">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-kanban me-2"></i>Tracking System
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item admin-only">
+                        <a class="nav-link" href="#" onclick="showPage('dashboard')">
+                            <i class="bi bi-grid-1x2 me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item admin-only">
+                        <a class="nav-link" href="#" onclick="showPage('projects')">
+                            <i class="bi bi-folder me-1"></i> Projects
+                        </a>
+                    </li>
+                    <li class="nav-item admin-only">
+                        <a class="nav-link" href="#" onclick="showPage('users')">
+                            <i class="bi bi-people me-1"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item user-only" style="display:none;">
+                        <a class="nav-link" href="#" onclick="showPage('kanban')">
+                            <i class="bi bi-kanban-fill me-1"></i> My Tasks
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                        <button class="btn btn-sm btn-outline-danger px-3 rounded-pill" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5" id="app-content">
+
+        <!-- Portal Selection Page -->
+        <div id="portal-page" class="page-view row justify-content-center text-center align-items-center" style="min-height: 80vh;">
+            <div class="col-12 mb-5">
+                <h1 class="fw-bold text-primary mb-3" style="font-size: 3.5rem;"><i class="bi bi-kanban"></i> Tracking System</h1>
+                <p class="text-muted fs-5">Select your portal to continue</p>
+            </div>
+            <div class="col-md-5 col-lg-4 mb-4">
+                <div class="card auth-card hover-card cursor-pointer h-100 border-0" onclick="openAuth('ROLE_A')">
+                    <div class="card-body py-5">
+                        <i class="bi bi-shield-lock text-danger mb-4" style="font-size: 4.5rem;"></i>
+                        <h3 class="fw-bold text-dark">Admin Portal</h3>
+                        <p class="text-muted mb-0 mt-3">Register or Login as Admin to manage projects, assign tasks, and track progress.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 col-lg-4 mb-4">
+                <div class="card auth-card hover-card cursor-pointer h-100 border-0" onclick="openAuth('ROLE_U')">
+                    <div class="card-body py-5">
+                        <i class="bi bi-person-workspace text-primary mb-4" style="font-size: 4.5rem;"></i>
+                        <h3 class="fw-bold text-dark">User Portal</h3>
+                        <p class="text-muted mb-0 mt-3">Register or Login as User to view your assigned tasks and update their statuses.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auth Page (Login/Register) -->
+        <div id="auth-page" class="page-view row justify-content-center" style="display: none; min-height: 85vh; align-items: center;">
+            <div class="col-md-5 col-lg-4">
+                <button class="btn btn-light mb-3 shadow-sm rounded-pill" onclick="showPage('portal')">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Portals
+                </button>
+                <div class="auth-card">
+                    <div class="text-center mb-4">
+                        <i id="auth-icon" class="bi bi-kanban text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="text-center" id="auth-title">Welcome Back</h3>
+                    <p class="text-center text-muted mb-4" id="auth-subtitle">Login to manage your projects</p>
+
+                    <form id="auth-form" onsubmit="handleAuth(event)">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                                <input type="text" id="username" class="form-control border-start-0 ps-0" placeholder="Enter username" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                                <input type="password" id="password" class="form-control border-start-0 ps-0" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="role" value="ROLE_U">
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3" id="auth-btn">
+                            Login <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </form>
+                    <div class="text-center mt-3 pt-3 border-top">
+                        <a href="#" onclick="toggleAuthMode()" id="auth-toggle" class="text-decoration-none fw-semibold">
+                            New here? Register Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page-view admin-only" style="display: none;">
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Admin Dashboard</h2>
+                    <p class="text-muted mb-0">Overview of your ongoing work</p>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-2">
+                <div class="col-md-4">
+                    <div class="stat-card bg-projects">
+                        <i class="bi bi-folder"></i>
+                        <h4>Total Projects</h4>
+                        <h2 id="stat-projects">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-tasks">
+                        <i class="bi bi-list-task"></i>
+                        <h4>Total Tasks</h4>
+                        <h2 id="stat-tasks">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-completed">
+                        <i class="bi bi-check-circle"></i>
+                        <h4>Completed Tasks</h4>
+                        <h2 id="stat-completed">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects Page -->
+        <div id="projects-page" class="page-view admin-only" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Manage Projects</h2>
+                    <p class="text-muted mb-0">Manage and track your project progress</p>
+                </div>
+                <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#projectModal">
+                    <i class="bi bi-plus-lg me-1"></i> New Project
+                </button>
+            </div>
+            <div class="row g-4" id="projects-list">
+                <!-- Projects will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Users List Page (Admin only) -->
+        <div id="users-page" class="page-view admin-only" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Users List</h2>
+                    <p class="text-muted mb-0">All registered users in the system</p>
+                </div>
+                <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#userModal">
+                    <i class="bi bi-person-plus me-1"></i> Add User
+                </button>
+            </div>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Date Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-list-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Page (Admin sees list) -->
+        <div id="tasks-page" class="page-view admin-only" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1" id="task-project-title">Project Tasks</h2>
+                    <p class="text-muted mb-0">Manage and assign tasks to users</p>
+                </div>
+                <div>
+                    <button class="btn btn-light shadow-sm me-2 fw-semibold" onclick="showPage('projects')">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </button>
+                    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#taskModal">
+                        <i class="bi bi-plus-lg me-1"></i> New Task
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Task Title</th>
+                                <th>Description</th>
+                                <th>Due Date</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasks-list">
+                            <!-- Tasks will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kanban Board Page (User Role) -->
+        <div id="kanban-page" class="page-view user-only" style="display: none;">
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">My Dashboard</h2>
+                    <p class="text-muted mb-0">Track and manage your assigned tasks</p>
+                </div>
+            </div>
+
+            <!-- User Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card bg-projects p-4">
+                        <h5 class="mb-1">Total Assigned</h5>
+                        <h2 id="user-stat-total" class="mb-0">0</h2>
+                        <i class="bi bi-list-task"></i>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-tasks p-4">
+                        <h5 class="mb-1">In Progress</h5>
+                        <h2 id="user-stat-progress" class="mb-0">0</h2>
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-completed p-4">
+                        <h5 class="mb-1">Completed Tasks</h5>
+                        <h2 id="user-stat-completed" class="mb-0">0</h2>
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row kanban-board g-4">
+                <!-- Pending Column -->
+                <div class="col-md-4">
+                    <div class="kanban-column bg-white rounded-3 p-3 h-100 shadow-sm border-top border-4 border-warning">
+                        <h5 class="kanban-title mb-3"><i class="bi bi-clock-history me-2 text-warning"></i>Pending</h5>
+                        <div class="kanban-dropzone" id="zone-Pending" ondragover="allowDrop(event)" ondrop="drop(event, 'Pending')">
+                            <!-- Tasks injected here -->
+                        </div>
+                    </div>
+                </div>
+                <!-- In Progress Column -->
+                <div class="col-md-4">
+                    <div class="kanban-column bg-white rounded-3 p-3 h-100 shadow-sm border-top border-4 border-primary">
+                        <h5 class="kanban-title mb-3"><i class="bi bi-arrow-repeat me-2 text-primary"></i>In Progress</h5>
+                        <div class="kanban-dropzone" id="zone-In Progress" ondragover="allowDrop(event)" ondrop="drop(event, 'In Progress')">
+                            <!-- Tasks injected here -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Completed Column -->
+                <div class="col-md-4">
+                    <div class="kanban-column bg-white rounded-3 p-3 h-100 shadow-sm border-top border-4 border-success">
+                        <h5 class="kanban-title mb-3"><i class="bi bi-check-circle-fill me-2 text-success"></i>Completed</h5>
+                        <div class="kanban-dropzone" id="zone-Completed" ondragover="allowDrop(event)" ondrop="drop(event, 'Completed')">
+                            <!-- Tasks injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- User Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Create New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="user-form" onsubmit="createUser(event)">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" id="new-username" class="form-control" placeholder="e.g. employee01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Temporary Password</label>
+                            <input type="text" id="new-password" class="form-control" placeholder="e.g. pass123" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Role</label>
+                            <select id="new-role" class="form-select border-1 form-control">
+                                <option value="ROLE_U">User (ROLE_U)</option>
+                                <option value="ROLE_A">Admin (ROLE_A)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            Create User <i class="bi bi-check-lg ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div class="modal fade" id="projectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-folder-plus me-2"></i>Create New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="project-form" onsubmit="createProject(event)">
+                        <div class="mb-3">
+                            <label class="form-label">Project Name</label>
+                            <input type="text" id="proj-name" class="form-control" placeholder="e.g. Website Redesign" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea id="proj-desc" class="form-control" rows="3" placeholder="What is this project about?" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Deadline</label>
+                            <input type="date" id="proj-deadline" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            Create Project <i class="bi bi-check-lg ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Details Modal (For Users) -->
+    <div class="modal fade" id="taskDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="detail-task-title">Task Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <span id="detail-task-status" class="badge bg-primary mb-2">Status</span>
+                        <span id="detail-task-date" class="badge bg-light text-dark border ms-2"><i class="bi bi-calendar"></i> Date</span>
+                    </div>
+                    <h6 class="text-muted mb-2">Description:</h6>
+                    <div class="p-3 bg-light rounded-3">
+                        <p id="detail-task-desc" class="mb-0" style="white-space: pre-wrap; font-size: 0.95rem;"></p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary w-100 rounded-pill" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal fade" id="taskModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-plus-square me-2"></i>Add New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="task-form" onsubmit="createTask(event)">
+                        <div class="mb-3">
+                            <label class="form-label">Task Title</label>
+                            <input type="text" id="task-title" class="form-control" placeholder="e.g. Design Homepage" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea id="task-desc" class="form-control" rows="2" placeholder="Task details..." required></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Due Date</label>
+                                <input type="date" id="task-date" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Status</label>
+                                <select id="task-status" class="form-select border-1 form-control">
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Assign To</label>
+                            <select id="task-assignee" class="form-select border-1 form-control">
+                                <option value="">-- Unassigned --</option>
+                                <!-- Users will be loaded here -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            Add Task <i class="bi bi-check-lg ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center mt-5 py-4 text-muted">
+        <p class="mb-0 fw-medium">Tracking System &bull; Developed by Paras</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
